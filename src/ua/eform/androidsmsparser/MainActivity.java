@@ -59,11 +59,9 @@ public class MainActivity extends Activity {
 	private Cursor createCursor() {
 		Uri uriSms = Uri.parse("content://sms/inbox");
 		
-		//String selection = "address = ?";
 		String selection = "address = ? or address = ?";
 		
-		//String[] selectionArg = new String[] {"10901"};
-		String[] selectionArg = new String[] {"+380630555678", "10901"};
+		String[] selectionArg = new String[] {"+380630555678", "OTP Bank"};
 		
 		Cursor cursor = getContentResolver().
 				query(uriSms,
@@ -74,26 +72,25 @@ public class MainActivity extends Activity {
 		return cursor;
 	}
 
-	private void proceedCursorToFile(Cursor cursor, File file)
-			throws FileNotFoundException {
+	private void proceedCursorToFile(Cursor cursor, File file) throws FileNotFoundException {
 		PrintStream ps = new PrintStream(file);
-		do
-		{
+		do {
 			writeSmsRecordToStream(ps, cursor);
 		} while (cursor.moveToNext());
 		ps.close();
 	}
 
 	private void writeSmsRecordToStream(PrintStream ps, Cursor cursor) {
-
-		//address - telephon number
-		//body - message body
-		
 		String body = cursor.getString(cursor.getColumnIndex("body"));
 		String sender = cursor.getString(cursor.getColumnIndex("address"));
 		long date = cursor.getLong(cursor.getColumnIndex("date"));
-		String stringToAdd = date+";"+sender+";"+body.replace("\n", "");
-		ps.println(stringToAdd);
+		StringBuilder builder = new StringBuilder();
+		builder.append(date)
+			.append(";")
+			.append(sender)
+			.append(";")
+			.append(body.replace("\n", ""));
+		ps.println(builder.toString());
 		Log.d(TAG, cursor.getString(cursor.getColumnIndex("body")));
 	}
 
