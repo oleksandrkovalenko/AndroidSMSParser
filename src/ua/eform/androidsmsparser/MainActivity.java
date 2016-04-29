@@ -59,7 +59,7 @@ public class MainActivity extends Activity {
 	private Cursor createCursor() {
 		Uri uriSms = Uri.parse("content://sms/inbox");
 		
-		String selection = "address = ? or address = ?";
+		String selection = "address = ? or address = ? or address = ?";
 		
 		String[] selectionArg = new String[] {"+380630555678", "OTP Bank", "10901"};
 		
