@@ -61,7 +61,7 @@ public class MainActivity extends Activity {
 		
 		String selection = "address = ? or address = ?";
 		
-		String[] selectionArg = new String[] {"+380630555678", "OTP Bank"};
+		String[] selectionArg = new String[] {"+380630555678", "OTP Bank", "10901"};
 		
 		Cursor cursor = getContentResolver().
 				query(uriSms,
