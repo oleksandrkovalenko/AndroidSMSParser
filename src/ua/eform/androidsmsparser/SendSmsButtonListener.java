@@ -4,10 +4,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
 
-import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Environment;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -15,6 +13,8 @@ import android.view.View.OnClickListener;
 public class SendSmsButtonListener implements OnClickListener {
 
 	public static final String TAG = "SendSmsButtonListener";
+	
+	public static final String DEFAULT_FILE_NAME = "smslist.txt";
 	
 	private MainActivity activity;
 	
@@ -31,10 +31,17 @@ public class SendSmsButtonListener implements OnClickListener {
 		Cursor cursor = createSmsCursor();
 		
 		cursor.moveToFirst();
-		logColumnsNames(cursor);
+		Utils.logColumnsNames(cursor);
 		
-		File file = getDefaultFileName();
+		File file = Utils.getDefaultFileName(DEFAULT_FILE_NAME);
 		
+		serializeCursorToFile(cursor, file);
+		
+		//Sending file as e-mail
+		Utils.sendFileByEmail(file, activity);
+	}
+
+	private void serializeCursorToFile(Cursor cursor, File file) {
 		cursor.moveToFirst();
 		try {
 			proceedCursorToFile(cursor, file);
@@ -42,9 +49,6 @@ public class SendSmsButtonListener implements OnClickListener {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		//Sending file as e-mail
-		sendFileByEmail(file);
 	}
 	
 	private Cursor createSmsCursor() {
@@ -83,48 +87,5 @@ public class SendSmsButtonListener implements OnClickListener {
 			.append(body.replace("\n", ""));
 		ps.println(builder.toString());
 		Log.d(TAG, cursor.getString(cursor.getColumnIndex("body")));
-	}
-
-	private File getDefaultFileName() {
-		return new File(
-				Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM),
-				"smslist.txt");
-	}
-
-	private void logColumnsNames(Cursor cursor) {
-		for (String column : cursor.getColumnNames()) {
-			int columnIndex = cursor.getColumnIndex(column);
-			int typeInt = cursor.getType(columnIndex);
-			switch (typeInt)
-			{
-			case Cursor.FIELD_TYPE_NULL: 
-				Log.d(TAG, column + " NULL");
-				break;
-			case Cursor.FIELD_TYPE_INTEGER:
-				Log.d(TAG, column + " Integer " + cursor.getInt(columnIndex));
-				break;
-			case Cursor.FIELD_TYPE_FLOAT:
-				Log.d(TAG, column + " float " + cursor.getFloat(columnIndex));
-				break;
-			case Cursor.FIELD_TYPE_STRING:
-				Log.d(TAG, column + " string " + cursor.getString(columnIndex));
-				break;
-			default:
-				Log.d(TAG, column + " " + typeInt);
-				break;
-			}
-		}
-		Log.d(TAG, String.valueOf(cursor.getCount()));
-	}
-
-	private void sendFileByEmail(File file) {
-		Intent emailIntent = new Intent(Intent.ACTION_SEND);
-		emailIntent.setData(Uri.parse("mailto:"));
-		emailIntent.setType("text/plain");
-		emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[] {"alekz@ukr.net"});
-		emailIntent.putExtra(Intent.EXTRA_SUBJECT, "file list");
-		emailIntent.putExtra(Intent.EXTRA_TEXT, "");
-		emailIntent.putExtra(Intent.EXTRA_STREAM, Uri.parse("file://"+file.getAbsolutePath()));
-		activity.startActivity(emailIntent);
 	}
 }
